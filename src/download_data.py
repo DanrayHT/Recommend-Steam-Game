@@ -1,5 +1,5 @@
 from huggingface_hub import hf_hub_download
-from preprocessing import load_config, resolve_path
+from .preprocessing import load_config, resolve_path
 
 HF_REPO_ID = "DanrayHT/steam_data_with_playtime"
 USER_PARTS = ["game_info.csv", "user_final.csv"]

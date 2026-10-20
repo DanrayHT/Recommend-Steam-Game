@@ -12,10 +12,10 @@ def load_config():
     config = ConfigParser()
 
     if not config.read(CONFIG_PATH, encoding="utf-8"):
-        raise FileNotFoundError(f"Không tìm thấy config.ini: {CONFIG_PATH}")
+        raise FileNotFoundError(f"config.ini not found: {CONFIG_PATH}")
 
     if not config.has_section("paths"):
-        raise ValueError("config.ini phải có section [paths]")
+        raise ValueError("config.ini needs a [paths] section")
 
     return config
 
@@ -54,7 +54,7 @@ class DataPreprocessor:
         path = self.data_dir / filename
 
         if not path.exists():
-            raise FileNotFoundError(f"Không tìm thấy file: {path}")
+            raise FileNotFoundError(f"File not found: {path}")
 
         return pd.read_csv(path, low_memory=False, usecols=usecols)
 
@@ -76,7 +76,7 @@ class DataPreprocessor:
 
         if missing:
             raise ValueError(
-                f"{dataset_name} thiếu các cột: {sorted(missing)}"
+                f"{dataset_name} missing columns: {sorted(missing)}"
             )
 
         return df
@@ -101,7 +101,7 @@ class DataPreprocessor:
             .reset_index(drop=True)
         )
         df["game_id"] = df["game_id"].astype("int64")
-        print(f"Games: bỏ {before - len(df):,} dòng (thiếu/trùng game_id)")
+        print(f"Games: dropped {before - len(df):,} rows (missing/duplicate id)")
 
         df["review"] = (
             df["review"]
@@ -161,12 +161,12 @@ class DataPreprocessor:
             df.sort_values("playtime_forever", ascending=False, na_position="last")
             .drop_duplicates(subset=["user_id", "game_id"], keep="first")
         )
-        print(f"Users: bỏ {before - len(df):,} dòng (thiếu ID/trùng cặp)")
+        print(f"Users: dropped {before - len(df):,} rows (missing/duplicate)")
 
         if valid_game_ids is not None:
             before = len(df)
             df = df[df["game_id"].isin(valid_game_ids)]
-            print(f"Users: bỏ {before - len(df):,} dòng (game_id không có trong game_info)")
+            print(f"Users: dropped {before - len(df):,} rows (unknown game_id)")
 
         df[["user_id", "game_id"]] = df[["user_id", "game_id"]].astype("int64")
 

@@ -8,20 +8,17 @@ import pandas as pd
 from scipy import sparse
 from sklearn.decomposition import TruncatedSVD
 
-from preprocessing import load_config, resolve_path
+from .preprocessing import load_config, resolve_path
 
 FEATURES = [
-    # game
     "popularity_log",
     "review_score",
     "tag_count",
     "game_user_count_log",
     "game_avg_playtime_log",
-    # user (NaN ở chế độ pick5 vì playtime không có ý nghĩa)
     "user_hist_count",
     "user_total_playtime_log",
     "user_avg_playtime_log",
-    # chéo user-game
     "content_sim",
     "svd_sim",
 ]
@@ -47,7 +44,6 @@ def l2norm(x):
     return x / np.maximum(np.linalg.norm(x, axis=1, keepdims=True), 1e-8)
 
 def split_interactions(users, cfg, rng):
-    """Chọn target cho từng user và chia user thành train/valid/test."""
     users = users.copy()
     users["liked"] = users["playtime_forever"] >= cfg["min_playtime"]
 
@@ -112,7 +108,7 @@ def build_context(cfg, save_dir):
         )
 
     ones = lambda df: np.ones(len(df), np.float32)
-    OWN = mat(hist, ones(hist))      # game đã sở hữu (loại khỏi gợi ý)
+    OWN = mat(hist, ones(hist))
     TGT = mat(tgt, ones(tgt))
     W_full = mat(hist, np.log1p(hist["playtime_forever"].to_numpy()))
 
@@ -240,14 +236,14 @@ def evaluate(ctx, model, uidx, mode, k=5):
 
 def pick_device():
     try:
-        xgb.XGBRanker(
-            tree_method="hist", device="cuda", n_estimators=1
-        ).fit(
+        model = xgb.XGBRanker(tree_method="hist", device="cuda", n_estimators=1)
+        model.fit(
             np.random.rand(20, 2),
             np.random.randint(0, 2, 20),
             qid=np.repeat([0, 1], 10),
         )
-        return "cuda"
+        device = json.loads(model.get_booster().save_config())["learner"]["generic_param"]["device"]
+        return "cuda" if device.startswith("cuda") else "cpu"
     except Exception:
         return "cpu"
 
@@ -308,9 +304,10 @@ def main():
         eval_set=[(X_va, y_va)], eval_group=[g_va],
         verbose=50,
     )
+    ranker.get_booster().set_param({"device": "cpu"})
 
     metrics = {mode: evaluate(ctx, ranker, te, mode) for mode in ("full", "pick5")}
-    print("\nKết quả trên tập test (so với baseline):")
+    print("\nTest results (vs baselines):")
     for mode, res in metrics.items():
         print(f"\n[{mode}]")
         print(pd.DataFrame(res).T.round(4).to_string())
@@ -337,7 +334,7 @@ def main():
         }, f)
     (model_dir / "metrics.json").write_text(json.dumps(metrics, indent=2))
 
-    print(f"\nĐã lưu model vào: {model_dir}")
+    print(f"\nModel saved to: {model_dir}")
 
 
 if __name__ == "__main__":
