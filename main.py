@@ -1,5 +1,4 @@
 import getpass
-
 from src.preprocessing import CONFIG_PATH, load_config, resolve_path, get_model_dir
 from src.recommend import (
     N_PICKS,
@@ -46,7 +45,6 @@ RECOMMENDERS = {
     "3": ("ML pick", MLRecommender),
 }
 
-
 def ask_yes_no(question, default=False):
     hint = "Y/n" if default else "y/N"
 
@@ -59,7 +57,6 @@ def ask_yes_no(question, default=False):
             return True
         if answer in ("n", "no"):
             return False
-
 
 def parse_value(raw, typ, lo, hi):
     raw = raw.strip()
@@ -87,7 +84,6 @@ def parse_value(raw, typ, lo, hi):
 
     return value
 
-
 def same_value(old, new, typ):
     if typ in (int, float):
         try:
@@ -95,7 +91,6 @@ def same_value(old, new, typ):
         except ValueError:
             return False
     return str(old) == str(new)
-
 
 def edit_config(config):
     items = [
@@ -143,7 +138,6 @@ def edit_config(config):
 
     return changed
 
-
 def ensure_processed(config, force=False):
     data_dir = resolve_path(config.get("paths", "data_dir", fallback="data"))
     save_dir = resolve_path(config.get("paths", "save_dir", fallback="data/preprocessing"))
@@ -172,7 +166,6 @@ def ensure_processed(config, force=False):
     src.preprocessing.main()
     return True
 
-
 def maybe_train(save_dir, rerun, force=False):
     model_dir = get_model_dir(load_config())
     ready = (model_dir / "artifacts.pkl").exists() and (model_dir / "ranker.json").exists()
@@ -196,7 +189,6 @@ def maybe_train(save_dir, rerun, force=False):
 
         src.train.main()
 
-
 def ask_api_profile(catalog):
     api_key = getpass.getpass("Steam API key (hidden): ")
     steam_id = input("SteamID64 (17 digits): ")
@@ -206,7 +198,6 @@ def ask_api_profile(catalog):
     print(f"Steam returned {len(library)} games, {profile.stats[0]} in dataset.")
     return profile
 
-
 def parse_ids(raw):
     parts = [p.strip() for p in raw.replace(";", ",").split(",") if p.strip()]
 
@@ -214,7 +205,6 @@ def parse_ids(raw):
         raise ValueError("Enter numbers separated by commas.")
 
     return list(dict.fromkeys(int(p) for p in parts))
-
 
 def ask_picks_profile(catalog):
     raw = input(
@@ -229,7 +219,6 @@ def ask_picks_profile(catalog):
     names = [catalog.names[catalog.id_to_idx[i]] for i in ids]
     print("Selected:", "; ".join(f"{i} ({n})" for i, n in zip(ids, names)))
     return profile
-
 
 def ask_profile(catalog):
     handlers = {"1": ask_api_profile, "2": ask_picks_profile}
@@ -246,7 +235,6 @@ def ask_profile(catalog):
         except (ValueError, RuntimeError) as error:
             print(f"Error: {error}")
 
-
 def ask_tags(catalog, profile):
     if profile.auto_tags:
         print("Tags:", ", ".join(catalog.top_tags(profile.weights)))
@@ -254,7 +242,6 @@ def ask_tags(catalog, profile):
 
     raw = input("Filter tags (comma-separated, Enter to skip): ")
     return [t for t in raw.split(",") if t.strip()]
-
 
 def recommend_loop(catalog, profile):
     while True:
@@ -281,7 +268,6 @@ def recommend_loop(catalog, profile):
         if not ask_yes_no("\nTry another criterion?", default=True):
             break
 
-
 def main():
     config = load_config()
     changed = set()
@@ -305,7 +291,6 @@ def main():
     catalog = Catalog(save_dir)
     profile = ask_profile(catalog)
     recommend_loop(catalog, profile)
-
 
 if __name__ == "__main__":
     try:

@@ -7,7 +7,6 @@ BASE_DIR = Path(__file__).resolve().parent
 PROJECT_DIR = BASE_DIR.parent
 CONFIG_PATH = BASE_DIR / "config.ini"
 
-
 def load_config():
     config = ConfigParser()
 
@@ -18,7 +17,6 @@ def load_config():
         raise ValueError("config.ini needs a [paths] section")
 
     return config
-
 
 def resolve_path(value):
     path = Path(value).expanduser()
@@ -208,7 +206,6 @@ class DataPreprocessor:
             self.save_dir / "game_info_clean.csv", index=False
         )
         user_df.to_csv(self.save_dir / "user_final_clean.csv", index=False)
-
 
 class FeatureEngineer:
     def __init__(self, min_tag_freq=1):

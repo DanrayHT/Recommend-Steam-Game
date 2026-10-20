@@ -39,7 +39,6 @@ def read_cfg(config):
         "seed": config.getint(s, "seed", fallback=42),
     }
 
-
 def l2norm(x):
     return x / np.maximum(np.linalg.norm(x, axis=1, keepdims=True), 1e-8)
 
@@ -66,7 +65,6 @@ def split_interactions(users, cfg, rng):
     users["split"] = users["user_id"].map(split)
 
     return users.drop(columns="r")
-
 
 def build_context(cfg, save_dir):
     rng = np.random.default_rng(cfg["seed"])
@@ -157,7 +155,6 @@ def profile_scores(ctx, Wb):
         P = l2norm(np.asarray(Wb @ M))
         out.append(P @ M.T)
     return out
-
 
 def make_rows(ctx, uidx, mode, add_targets):
     cfg = ctx.cfg
@@ -335,7 +332,6 @@ def main():
     (model_dir / "metrics.json").write_text(json.dumps(metrics, indent=2))
 
     print(f"\nModel saved to: {model_dir}")
-
 
 if __name__ == "__main__":
     main()

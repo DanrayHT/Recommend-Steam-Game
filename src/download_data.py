@@ -4,7 +4,6 @@ from .preprocessing import load_config, resolve_path
 HF_REPO_ID = "DanrayHT/steam_data_with_playtime"
 USER_PARTS = ["game_info.csv", "user_final.csv"]
 
-
 def download_user_files():
     data_dir = resolve_path(load_config().get("paths", "data_dir", fallback="data"))
     data_dir.mkdir(parents=True, exist_ok=True)
@@ -24,7 +23,6 @@ def download_user_files():
             local_dir=str(data_dir),
         )
         print(f"Downloaded: {local_path}")
-
 
 if __name__ == "__main__":
     download_user_files()

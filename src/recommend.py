@@ -1,11 +1,9 @@
 import getpass
 import pickle
 from dataclasses import dataclass
-
 import numpy as np
 import pandas as pd
 import requests
-
 from .preprocessing import load_config, resolve_path, get_model_dir
 
 STEAM_URL = "https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/"
@@ -14,7 +12,6 @@ MIN_REVIEW_SCORE = 3
 
 def l2norm(x):
     return x / np.maximum(np.linalg.norm(x, axis=-1, keepdims=True), 1e-8)
-
 
 class Catalog:
     def __init__(self, save_dir):
@@ -87,7 +84,6 @@ class Catalog:
             "score": np.round(scores[idx], 4),
         })
 
-
 @dataclass
 class UserProfile:
     weights: np.ndarray
@@ -95,7 +91,6 @@ class UserProfile:
     mode: str
     stats: tuple
     auto_tags: bool = False
-
 
 def profile_from_library(catalog, playtimes):
     idx, mins = [], []
@@ -121,7 +116,6 @@ def profile_from_library(catalog, playtimes):
     stats = (len(idx), np.log1p(mins.sum()), np.log1p(mins.mean()))
     return UserProfile(weights, owned, "full", stats)
 
-
 def profile_from_picks(catalog, game_ids):
     game_ids = list(dict.fromkeys(int(g) for g in game_ids))
 
@@ -140,7 +134,6 @@ def profile_from_picks(catalog, game_ids):
 
     return UserProfile(weights, owned, "pick5", (len(idx), np.nan, np.nan), auto_tags=True)
 
-
 def parse_owned_games(payload):
     games = payload.get("response", {}).get("games")
 
@@ -150,7 +143,6 @@ def parse_owned_games(payload):
         )
 
     return {int(g["appid"]): float(g.get("playtime_forever", 0)) for g in games}
-
 
 def fetch_steam_library(api_key, steam_id, timeout=15):
     steam_id = steam_id.strip()
@@ -184,7 +176,6 @@ def fetch_steam_library(api_key, steam_id, timeout=15):
 
     return parse_owned_games(payload)
 
-
 class BaseRecommender:
     def __init__(self, catalog):
         self.catalog = catalog
@@ -202,7 +193,6 @@ class BaseRecommender:
 
     def recommend(self, profile, k=5, tags=None):
         raise NotImplementedError
-
 
 class PopularityRecommender(BaseRecommender):
 
@@ -234,7 +224,6 @@ class CompatibilityRecommender(BaseRecommender):
 
         scores = self.alpha * z(content) + (1 - self.alpha) * z(svd)
         return c.describe(self._top(scores, allowed, k), scores)
-
 
 class MLRecommender(BaseRecommender):
 
@@ -275,7 +264,6 @@ class MLRecommender(BaseRecommender):
         scores[g] = self.model.predict(X)
         return c.describe(self._top(scores, allowed, k), scores)
 
-
 def ask_steam_profile(catalog):
     api_key = getpass.getpass("Steam API key (hidden): ")
     steam_id = input("SteamID64 (17 digits): ")
@@ -283,7 +271,6 @@ def ask_steam_profile(catalog):
     profile = profile_from_library(catalog, library)
     print(f"Found {len(library)} games, {profile.stats[0]} in dataset.")
     return profile
-
 
 def ask_picks_profile(catalog):
     picks = []
@@ -312,7 +299,6 @@ def ask_picks_profile(catalog):
         print(f"Picked: {found.iloc[int(choice)]['name']}")
 
     return profile_from_picks(catalog, picks)
-
 
 def main():
     config = load_config()
@@ -359,7 +345,6 @@ def main():
 
     print("\nRecommendations:")
     print(result.to_string(index=False))
-
 
 if __name__ == "__main__":
     main()
