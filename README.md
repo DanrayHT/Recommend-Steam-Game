@@ -33,7 +33,7 @@ All numbers come from `model/metrics.json`, produced at the end of training on *
 
 ### Setup
 
-- **"Liked" game:** playtime ≥ `min_playtime` (default 120 minutes). Games owned by fewer than `min_game_users` users (default 20) are dropped, and users need at least `min_liked` liked games (default 6).
+- **"Liked" game:** playtime ≥ `min_playtime` (120 minutes). Games owned by fewer than `min_game_users` users (20) are dropped, and users need at least `min_liked` (4) liked games. These values are set in `src/config.ini`.
 - **Targets:** for each user, about 20% of their liked games (between 1 and 5) are hidden as targets. All remaining games form the user's history, which is the only input to the recommender.
 - **Profiles:** `full` weights the history by `log(1 + playtime)`; `pick5` uses 5 randomly sampled liked games from the history (a simulation of the 5-game cold start). The ranker is trained on a mix of both.
 - **Candidate generation:** the union of the top-150 games by popularity and the top-150 by tag similarity, excluding owned games. During training the hidden targets are always added to the candidates so the ranker sees positives; during evaluation they are **not**, so a target that candidate generation misses counts as a miss.
