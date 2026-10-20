@@ -1,6 +1,16 @@
 # Data
 *.csv
-data/
+data/*
+!data/preprocessing/
+data/preprocessing/*
+!data/preprocessing/game_info_clean.csv
+
+# Model
+model/metrics.json
+
+# Secrets
+.streamlit/secrets.toml
+.env
 
 # Python
 __pycache__/

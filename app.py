@@ -4,7 +4,7 @@ from pathlib import Path
 import streamlit as st
 
 from main import PROCESSED_FILES, RAW_FILES, SETTINGS
-from src.preprocessing import CONFIG_PATH, load_config, resolve_path, get_model_dir
+from src.preprocessing import CONFIG_PATH, get_model_dir, load_config, resolve_path
 from src.recommend import (
     N_PICKS,
     Catalog,
@@ -52,12 +52,16 @@ def get_paths(config):
 
 
 def data_state():
-    data_dir, save_dir = get_paths(load_config())
-    model_dir = get_model_dir(load_config())
+    config = load_config()
+    data_dir, save_dir = get_paths(config)
+    model_dir = get_model_dir(config)
+    model_ready = all((model_dir / f).exists() for f in ("artifacts.pkl", "ranker.json"))
+
     return {
         "raw": all((data_dir / f).exists() for f in RAW_FILES),
         "processed": all((save_dir / f).exists() for f in PROCESSED_FILES),
-        "model": all((model_dir / f).exists() for f in ("artifacts.pkl", "ranker.json")),
+        "model": model_ready,
+        "serve": model_ready and (save_dir / "game_info_clean.csv").exists(),
         "save_dir": save_dir,
         "model_dir": model_dir,
     }
@@ -326,7 +330,7 @@ def show_results():
         return
 
     st.divider()
-    st.subheader("Recommendations")
+    st.markdown("**Results**")
     st.caption(data["info"])
 
     tabs = st.tabs(list(data["frames"]))
@@ -338,6 +342,22 @@ def show_results():
                 st.info("No games found.")
             else:
                 st.dataframe(frame, hide_index=True)
+
+
+def recommend_panel(engine):
+    with st.container(border=True):
+        st.subheader("Recommend")
+
+        if engine is None:
+            st.warning("No trained model yet. Run Train first.")
+
+        steam, pick = st.tabs(["Steam API", "Pick 5"])
+        with steam:
+            steam_tab(engine)
+        with pick:
+            pick_tab(engine)
+
+        show_results()
 
 
 def main():
@@ -352,19 +372,10 @@ def main():
     train_panel(state)
 
     engine = None
-    if state["processed"] and state["model"]:
+    if state["serve"]:
         stamp = (state["model_dir"] / "artifacts.pkl").stat().st_mtime_ns
         engine = load_engine(str(state["save_dir"]), stamp)
-    else:
-        st.warning("No trained model yet. Run Train first.")
 
-    steam, pick = st.tabs(["Steam API", "Pick 5"])
-    with steam:
-        steam_tab(engine)
-    with pick:
-        pick_tab(engine)
-
-    show_results()
-
+    recommend_panel(engine)
 
 main()
