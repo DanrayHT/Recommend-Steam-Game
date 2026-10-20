@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import requests
 
-from .preprocessing import load_config, resolve_path
+from .preprocessing import load_config, resolve_path, get_model_dir
 
 STEAM_URL = "https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/"
 N_PICKS = 5
@@ -18,7 +18,7 @@ def l2norm(x):
 
 class Catalog:
     def __init__(self, save_dir):
-        self.model_dir = save_dir / "model"
+        self.model_dir = get_model_dir(load_config())
 
         with open(self.model_dir / "artifacts.pkl", "rb") as f:
             a = pickle.load(f)

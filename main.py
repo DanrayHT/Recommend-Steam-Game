@@ -1,6 +1,6 @@
 import getpass
 
-from src.preprocessing import CONFIG_PATH, load_config, resolve_path
+from src.preprocessing import CONFIG_PATH, load_config, resolve_path, get_model_dir
 from src.recommend import (
     N_PICKS,
     Catalog,
@@ -16,6 +16,7 @@ SETTINGS = {
     "paths": {
         "data_dir": (str, "data", None, None),
         "save_dir": (str, "data/preprocessing", None, None),
+        "model_dir": (str, "model", None, None),
     },
     "features": {
         "min_tag_freq": (int, 1, 1, None),
@@ -173,7 +174,7 @@ def ensure_processed(config, force=False):
 
 
 def maybe_train(save_dir, rerun, force=False):
-    model_dir = save_dir / "model"
+    model_dir = get_model_dir(load_config())
     ready = (model_dir / "artifacts.pkl").exists() and (model_dir / "ranker.json").exists()
 
     if not ready:
@@ -217,7 +218,7 @@ def parse_ids(raw):
 
 def ask_picks_profile(catalog):
     raw = input(
-        f"Enter {N_PICKS} game_ids separated by commas (e.g. 730, 11230): "
+        f"Enter {N_PICKS} game_ids separated by commas (e.g. 730, 570): "
     )
     ids = parse_ids(raw)
 

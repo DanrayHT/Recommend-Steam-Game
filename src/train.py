@@ -8,7 +8,7 @@ import pandas as pd
 from scipy import sparse
 from sklearn.decomposition import TruncatedSVD
 
-from .preprocessing import load_config, resolve_path
+from .preprocessing import load_config, resolve_path, get_model_dir
 
 FEATURES = [
     "popularity_log",
@@ -253,7 +253,7 @@ def main():
     save_dir = resolve_path(
         config.get("paths", "save_dir", fallback="data/preprocessing")
     )
-    model_dir = save_dir / "model"
+    model_dir = get_model_dir(config)
     model_dir.mkdir(parents=True, exist_ok=True)
     rng = np.random.default_rng(cfg["seed"])
 

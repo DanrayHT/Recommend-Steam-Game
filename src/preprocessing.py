@@ -28,6 +28,8 @@ def resolve_path(value):
 
     return path.resolve()
 
+def get_model_dir(config):
+    return resolve_path(config.get("paths", "model_dir", fallback="model"))
 
 class DataPreprocessor:
     REVIEW_MAPPING = {
