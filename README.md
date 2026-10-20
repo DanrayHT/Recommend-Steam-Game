@@ -118,7 +118,7 @@ Dependencies: `numpy`, `pandas`, `scipy`, `scikit-learn`, `xgboost`, `requests`,
 
 ## 5. Usage
 
-### `main.py` — interactive CLI
+### `main.py` - interactive CLI
 
 ```bash
 python main.py
@@ -126,15 +126,15 @@ python main.py
 
 Flow:
 
-1. **Config** — optionally edit `[paths]`, `[features]`, `[train]` values in `src/config.ini`.
-2. **Data** — raw CSVs are downloaded automatically if missing, then preprocessed into `data/preprocessing/` (`game_info_clean.csv`, `user_final_clean.csv`, `game_features.csv`, `game_tags_multihot.csv`).
-3. **Training** — the XGBoost model is trained (or retrained on request), evaluated against the baselines, and saved to `model/artifacts.pkl`, `model/ranker.json` and `model/metrics.json`. The test results are also printed to the console.
-4. **Profile** — build your profile either by:
+1. **Config** - optionally edit `[paths]`, `[features]`, `[train]` values in `src/config.ini`.
+2. **Data** - raw CSVs are downloaded automatically if missing, then preprocessed into `data/preprocessing/` (`game_info_clean.csv`, `user_final_clean.csv`, `game_features.csv`, `game_tags_multihot.csv`).
+3. **Training** - the XGBoost model is trained (or retrained on request), evaluated against the baselines, and saved to `model/artifacts.pkl`, `model/ranker.json` and `model/metrics.json`. The test results are also printed to the console.
+4. **Profile** - build your profile either by:
    - entering a Steam Web API key + SteamID64 (your owned games are fetched via `GetOwnedGames`), or
    - picking 5 games by name.
-5. **Recommend loop** — choose criterion `1` (Popularity), `2` (Compatibility) or `3` (ML pick), optionally filter by tag, and get a ranked table of recommendations.
+5. **Recommend loop** - choose criterion `1` (Popularity), `2` (Compatibility) or `3` (ML pick), optionally filter by tag, and get a ranked table of recommendations.
 
-### `app.py` — Streamlit web app
+### `app.py` - Streamlit web app
 
 ```bash
 streamlit run app.py
@@ -142,20 +142,20 @@ streamlit run app.py
 
 Then open <http://localhost:8501> in your browser (or use the [hosted demo](https://danrayht-recommend-steam-game-app-w7bsws.streamlit.app/)). The UI offers two input tabs:
 
-- **Steam API** — enter an API key + SteamID64 to load your library;
-- **Pick 5** — enter 5 game IDs manually.
+- **Steam API** - enter an API key + SteamID64 to load your library;
+- **Pick 5** - enter 5 game IDs manually.
 
 On submit, all three engines run at once (top 5 each) and results are shown in separate tabs. If the model hasn't been trained yet, the app warns you to train it locally first (`python main.py`).
 
 ## 6. Output
 
-**CLI (`main.py`)** — a ranked table printed in the terminal for each run:
+**CLI (`main.py`)** - a ranked table printed in the terminal for each run:
 
 | game_id | name | tags | score |
 |---------|------|------|-------|
 | …       | …    | …    | …     |
 
-**Streamlit (`app.py`)** — one tab per engine, each showing the top-5 recommendations with the same columns (game_id, name, tags, score).
+**Streamlit (`app.py`)** - one tab per engine, each showing the top-5 recommendations with the same columns (game_id, name, tags, score).
 
 **Artifacts on disk:**
 
